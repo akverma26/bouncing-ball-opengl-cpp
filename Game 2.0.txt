@@ -1,0 +1,343 @@
+#include<iostream>
+using namespace std;
+#include <windows.h>
+#include <GL/glut.h>
+
+//All Variables
+float tx=0,ty=0,tz=0; //Translation of Platform
+float cx=0,cy=0,cz=100;//Camera Position
+float vx=0,vy=0,vz=0;//Reference Point
+float BallR=3;//Ball Radius
+int out=1;//Out
+float px1=50,py1=100,pz1=50;//Box Size
+float Ballx=0,Bally=0,Ballz=0; //Ball Translation
+float BallXSpeed=0.3, BallYSpeed=0.1, BallZSpeed=0.0; //Ball Speed
+float px=4.5,py=0.5,pz=1.5;//Platform Size
+int keyRepeat=0; //Key Repeat
+int LButtonDown=0; //Mouse left Button Press
+//float pointSize=0;
+int Width=720, Height=720; //Screen Width & Height
+int fullscreen=0;
+
+
+
+void drawBox()
+{
+	glBegin(GL_QUADS);
+		// FRONT
+		/*glColor3f(1,0,0);
+		glVertex3f(-px1, py1,  pz1);
+		glVertex3f(px1, py1,  pz1);
+		glVertex3f(px1,  -py1,  pz1);
+		glVertex3f(-px1,  -py1,  pz1);*/
+		// BACK
+		glColor3f(0,1,0);
+		glVertex3f(-px1, py1,  -pz1);
+		glVertex3f(px1, py1,  -pz1);
+		glVertex3f(px1,  -py1,  -pz1);
+		glVertex3f(-px1,  -py1,  -pz1);
+		// LEFT
+		glColor3f(1,01,0);
+		glVertex3f(-px1, py1,  -pz1);
+		glVertex3f(-px1,  py1,  pz1);
+		glVertex3f(-px1,  -py1, pz1);
+		glVertex3f(-px1, -py1, -pz1);
+		// RIGHT
+		glColor3f(1,0,01);
+		glVertex3f(px1, py1,  -pz1);
+		glVertex3f(px1,  py1,  pz1);
+		glVertex3f(px1,  -py1, pz1);
+		glVertex3f(px1, -py1, -pz1);
+		// TOP
+		/*glColor3f(0,1,01);
+		glVertex3f(-px1,  py1,  -pz1);
+		glVertex3f( px1,  py1,  -pz1);
+		glVertex3f( px1,  py1, pz1);
+		glVertex3f(-px1,  py1, pz1);*/
+		// BOTTOM
+		glColor3f(0,1,1);
+		glVertex3f(-px1,  -py1,  -pz1);
+		glVertex3f( px1,  -py1,  -pz1);
+		glVertex3f( px1,  -py1, pz1);
+		glVertex3f(-px1,  -py1, pz1);
+	glEnd();
+}
+
+
+void drawPlatForm()
+{
+	glBegin(GL_QUADS);
+		// FRONT
+		glVertex3f(-px, py,  pz);
+		glVertex3f(px, py,  pz);
+		glVertex3f(px,  -py,  pz);
+		glVertex3f(-px,  -py,  pz);
+		// BACK
+		glVertex3f(-px, py,  -pz);
+		glVertex3f(px, py,  -pz);
+		glVertex3f(px,  -py,  -pz);
+		glVertex3f(-px,  -py,  -pz);
+		// LEFT
+		glVertex3f(-px, py,  -pz);
+		glVertex3f(-px,  py,  pz);
+		glVertex3f(-px,  -py, pz);
+		glVertex3f(-px, -py, -pz);
+		// RIGHT
+		glVertex3f(px, py,  -pz);
+		glVertex3f(px,  py,  pz);
+		glVertex3f(px,  -py, pz);
+		glVertex3f(px, -py, -pz);
+		// TOP
+		glVertex3f(-px,  py,  -pz);
+		glVertex3f( px,  py,  -pz);
+		glVertex3f( px,  py, pz);
+		glVertex3f(-px,  py, pz);
+		// BOTTOM
+		glVertex3f(-px,  -py,  -pz);
+		glVertex3f( px,  -py,  -pz);
+		glVertex3f( px,  -py, pz);
+		glVertex3f(-px,  -py, pz);
+	glEnd();
+}
+
+void display()
+{
+     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+     glLoadIdentity();
+
+     gluLookAt(cx,cy,cz,  vx,vy,vy,  0,01,0);
+
+     glTranslatef(0,0,0);
+     drawBox();
+
+     glPushMatrix();
+     glColor3f(0,0,1);
+     glTranslatef(-9+tx,-py1+0.5+ty,-5+tz);
+     for(int j=0;j<10;j++)
+     {
+        glTranslatef(0,0,1);
+        glutSolidCube(1);
+     for(int i=0;i<19;i++)
+     {
+        glTranslatef(1,0,0);
+        glutSolidCube(1);
+     }
+        glTranslatef(-19,0,0);
+     }
+    glPopMatrix();
+
+    glTranslatef(Ballx,Bally,Ballz);
+    glColor3f(1,0,0);
+    glutSolidSphere(BallR,500,500);
+
+    glFlush();
+    glutSwapBuffers();
+
+
+    if(Ballx>=px1-BallR || Ballx<=-px1+BallR)
+        BallXSpeed=-BallXSpeed;
+    if(Bally>=py1-BallR|| Bally<=-py1+BallR)
+        BallYSpeed=-BallYSpeed;
+    if(Ballz>=pz1-BallR || Ballz<=-pz1+BallR)
+        BallZSpeed=-BallZSpeed;
+
+    Ballx+=BallXSpeed;
+    Bally+=BallYSpeed;
+    Ballz+=BallZSpeed;
+
+    cout<<Ballx<<" "<<Bally<<" "<<Ballz<<endl;
+
+    if((Ballx>=9.5+tx+BallR-0.5 || Ballx<=-9.5+tx-BallR+0.5|| Ballz>=4.5+tz+BallR-0.5 || Ballz<=-4.5+tz-BallR+0.5) && Bally<=-py1+1+BallR)
+    {
+        exit(1);
+    }
+}
+
+void idle()
+{
+    glutPostRedisplay();
+}
+
+void initGL()
+{
+    glClearColor(0,0,0,0.0);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glViewport(0,0,Width,Height);
+    gluOrtho2D(0,0,0,0);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glClearDepth(1);
+    //glEnable(GL_CULL_FACE);
+    //glFrontFace(GL_CCW);
+    //glCullFace(GL_BACK);
+
+}
+
+void resize(int w,int h)
+{
+    if(h==0) h=1;
+    Width=w;
+    Height=h;
+    float ratio=float(w)/float(h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glViewport(0,0,w,h);
+    gluPerspective(45,ratio,1,1000);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void normalKeys(unsigned char key,int x,int y)
+{
+    switch(key)
+    {
+    case 8: //BackSpace
+         break;
+    case 13: //Enter
+         break;
+    case 27: //Escape
+        exit(0); break;
+    case 127: //Delete
+        int mode=glutGetModifiers();
+        switch(mode)
+        {
+            case 0:
+                ty=0,tz=0; break;
+            case GLUT_ACTIVE_CTRL:
+                cout<<"Pressed CTRL+127"; break;
+            case GLUT_ACTIVE_SHIFT:
+                cout<<"Pressed SHIFT+127"; break;
+        }
+    }
+}
+
+void keyLift(unsigned char key, int x, int y)
+{
+    switch(key)
+    {
+    case 65:
+        cout<<"A is lifted"; break;
+    case 66:
+        cout<<"B is Lifted"; break;
+    }
+}
+
+void specialKeys(int key, int x, int y)
+{
+    int mode=glutGetModifiers();
+    switch(key)
+    {
+    case GLUT_KEY_UP:
+        if(mode==GLUT_ACTIVE_SHIFT) vz--;
+         else if(mode==GLUT_ACTIVE_CTRL) cz--;
+         else tz--; break;
+    case GLUT_KEY_DOWN:
+         if(mode==GLUT_ACTIVE_SHIFT) vz++;
+         else if(mode==GLUT_ACTIVE_CTRL) cz++;
+         else tz++;  break;
+    case GLUT_KEY_RIGHT:
+        if(mode==GLUT_ACTIVE_SHIFT) vx++;
+         else if(mode==GLUT_ACTIVE_CTRL) cx++;
+         else tx++;  break;
+    case GLUT_KEY_LEFT:
+        if(mode==GLUT_ACTIVE_SHIFT) vx--;
+         else if(mode==GLUT_ACTIVE_CTRL) cx--;
+         else tx--;  break;
+    case GLUT_KEY_PAGE_DOWN:
+        if(mode==GLUT_ACTIVE_SHIFT) vy--;
+         else if(mode==GLUT_ACTIVE_CTRL) cy--;
+         else ty--;  break;
+    case GLUT_KEY_PAGE_UP:
+        if(mode==GLUT_ACTIVE_SHIFT) vy++;
+         else if(mode==GLUT_ACTIVE_CTRL) cy++;
+         else ty++;  break;
+    case GLUT_KEY_HOME:
+        tx=0,ty=0,tz=0;
+        /*fullscreen=!fullscreen;
+        if(fullscreen)
+            glutFullScreen();
+        else
+        {
+            glutReshapeWindow(500,500);
+            glutPositionWindow(0,0);
+        }*/
+        break;
+    case GLUT_KEY_F1:
+        keyRepeat=!keyRepeat;
+        glutIgnoreKeyRepeat(!keyRepeat);
+        break;
+    case GLUT_KEY_F2:
+        int mode=glutGetModifiers();
+        switch(mode)
+        {
+        case 0:
+            cout<<"F2"; break;
+        case (GLUT_ACTIVE_ALT | GLUT_ACTIVE_CTRL):
+            cout<<"F2+AorC"; break;
+        }
+    }
+}
+
+void mouseKey(int button, int state, int x, int y)
+{
+    switch (button)
+    {
+    case GLUT_RIGHT_BUTTON:
+        if(state== GLUT_DOWN)
+        cout<<"1"; break;
+    case GLUT_LEFT_BUTTON:
+        if(state== GLUT_DOWN)
+            LButtonDown=!LButtonDown;
+        break;
+    case GLUT_MIDDLE_BUTTON:
+        if(state==GLUT_DOWN)
+        cout<<"3"; break;
+    }
+}
+
+void mouseMotion(int x, int y)
+{
+    if(LButtonDown)
+        cout << "Mouse dragged with left button at "<< "(" << x << "," << y << ")" << endl;
+}
+
+void mouseMotion2(int x, int y)
+{
+    if(LButtonDown)//Motion by Mouse
+    {
+        tx=(x-Width/2);
+        tz=(y-Height/2);
+    }
+}
+
+void cursor(int entry)
+{
+    if(entry==GLUT_ENTERED)
+        cout << "Mouse Entered" << endl;
+    else
+        cout << "Mouse Left" << endl;
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc , argv); //to Initialize the glut Library and invoked only once
+    glutInitDisplayMode(GLUT_DEPTH | GLUT_RGBA | GLUT_DOUBLE);
+    glutInitWindowSize(Width,Height);
+    glutInitWindowPosition(0,0);
+    glutCreateWindow("My Glut File");
+    glutDisplayFunc(display);
+    glutKeyboardFunc(normalKeys);
+    glutKeyboardUpFunc(keyLift);
+    glutSpecialFunc(specialKeys);
+    glutMouseFunc(mouseKey);
+    //glutMotionFunc(mouseMotion);
+    glutPassiveMotionFunc(mouseMotion2);
+    glutEntryFunc(cursor);
+    glutIdleFunc(idle);
+    glutReshapeFunc(resize);
+    initGL();
+    glutMainLoop(); //to Continue Looping
+    return 0;
+}
